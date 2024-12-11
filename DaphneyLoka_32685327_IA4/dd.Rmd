@@ -1,0 +1,21 @@
+---
+title: "sssss"
+author: "Daphney Loka"
+date: "2023-10-29"
+output: html_document
+---
+
++---------------+---------------+--------------------+
+| Fruit           | Price         | Advantages         |
++=================+===============+====================+
+| Death rate from |
+ chronic          |               |                    |
+|  respiratory    | $1.34         | - built-in wrapper |
+| disease         |               | - bright color     |
++---------------+---------------+--------------------+
+| Oranges         | $2.10         | - cures scurvy     |
+|                 |               | - tasty            |
++---------------+---------------+--------------------+
+
+
+

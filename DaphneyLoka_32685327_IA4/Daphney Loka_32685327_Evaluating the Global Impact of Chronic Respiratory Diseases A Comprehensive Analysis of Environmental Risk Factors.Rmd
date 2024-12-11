@@ -1,0 +1,869 @@
+---
+title: "Evaluating the Global Impact of Chronic Respiratory Diseases: A Comprehensive Analysis of Environmental Risk Factors"
+author: "Daphney Loka"
+date: "2023-10-20"
+output:
+  html_document:
+    code_folding: show
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+  papaja::apa6_pdf:
+    citation_package: biblatex
+  word_document:
+    toc: yes
+    toc_depth: '4'
+nocite: '@*'
+link-citations: yes
+bibliography: 
+- my_ref.bib
+- packages.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+# Automatically add reference entries of R packages to 'packages.bib'
+knitr::write_bib(c(.packages(), "bookdown"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "dplyr"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "tidyverse"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "readxl"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "hablar"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "visdat"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "gtsummary"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "caret"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "recipes"), file = "packages.bib")
+knitr::write_bib(c(.packages(), "rsample"), file = "packages.bib")
+```
+
+```{r}
+library(dplyr)
+
+library(tidyverse)
+
+library(readxl)
+```
+
+# **Topic Description**
+
+[**Chronic respiratory diseases (CRD)**]{.underline} have become a global concern, ranking as the third leading cause of global mortality [@emersonaugustobaptista2021], with four million deaths in 2019 [@gbd2019chronicrespiratorydiseasescollaborators2019]. Approximately 7.4% of the world's population (545 million people) grapple with CRD, significantly impacting their daily lives and life expectancy [@gbdchronicrespiratorydiseasecollaborators2020]. It is imperative to understand the incidence, morbidity, and mortality patterns of CRD on both a **global and regional scale**. Despite its widespread impact, CRD has received less public attention and research funding compared to other well-known diseases [@wassimwlabaki2020]. This study aims to investigate environmental risk factors related to air pollution, which directly or indirectly trigger incurable CRD symptoms. It will provide insights into the broader implications of CRD and will help guide preventive measures, screening, treatment, research activities, and enhance public awareness of the disease's severity [@wassimwlabaki2020]. This study's focus is on CRD as a whole, rather than solely on one specific type of CRD.
+
+# **Data Acquisition**
+
+## Variables Used
+
+Dependent, Independent, and Control Variables Description
+
++--------------------+---------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
+|                    | Variables                                         | Description                                                                                                                                                                                                                                                                              | Measurement | Data source                    |
++====================+===================================================+==========================================================================================================================================================================================================================================================================================+=============+================================+
+| Dependent (Target) | Death rate from Chronic Respiratory Disease (CRD) | Long-term conditions that damage the lungs and airways, with symptoms of coughing, shortness of breath, and decreased lung function, affecting the body's ability to receive enough oxygen, and hence, influence people's daily activities and overall well-being                        | Numeric     | [@OurWorldinData2021]          |
+|                    |                                                   |                                                                                                                                                                                                                                                                                          |             |                                |
+|                    |                                                   | It is measured per 100,000 people                                                                                                                                                                                                                                                        |             |                                |
+|                    |                                                   |                                                                                                                                                                                                                                                                                          |             |                                |
+|                    |                                                   | -   Country, Code, Year, CRD death rate (age and gender standardised)                                                                                                                                                                                                                    |             |                                |
++--------------------+---------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
+| Independent 1      | Forest Area                                       | The land under natural or planted stands of trees, either productive or not, that reaches at least 5 metres height in situ. It does not include trees in urban parks, gardens and tree stands in agricultural production systems (such as in fruit plantations and agroforestry systems) | Numeric     | [@WorldBank2023]               |
+|                    |                                                   |                                                                                                                                                                                                                                                                                          |             |                                |
+|                    |                                                   | It is measured by % of land area of a country                                                                                                                                                                                                                                            |             |                                |
+|                    |                                                   |                                                                                                                                                                                                                                                                                          |             |                                |
+|                    |                                                   | -   Country, Code, 2015-2019 Forest area                                                                                                                                                                                                                                                 |             |                                |
++--------------------+---------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
+| Independent 2      | Concentrations of Fine Particulate Matter (PM2.5) | The annual mean of fine particulate matter (PM2.5), which includes sulphate, nitrates, and black carbon) that poses a greater health risk as it may enter deeper into the lungs                                                                                                          | Numeric     | [@worldhealthorganization2023] |
+|                    |                                                   |                                                                                                                                                                                                                                                                                          |             |                                |
+|                    |                                                   | -   Country, Code, Fact Numeric Value (PM2.5)                                                                                                                                                                                                                                            |             |                                |
++--------------------+---------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
+| Independent 3      | Share of Adults who smoke                         | It measures the smoking prevalence based on % of adults (men and women aged 15 and older ) who smoke any tobacco product (excluding smokeless tobacco use) on a daily basis.                                                                                                             | Numeric     | [@OurWorldinData2023]          |
+|                    |                                                   |                                                                                                                                                                                                                                                                                          |             |                                |
+|                    |                                                   | -   Entity, Code, Year, Prevalance of current tobacco use of adults                                                                                                                                                                                                                      |             |                                |
++--------------------+---------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
+| Independent 4      | CO2 Emission                                      | The annual quantity of carbon dioxide (CO2) emitted from fossil fuels burning (coal, oil, gas) directly industrial processes such as cement and steel production. Fossil emissions do not include land use change, deforestation, soils, and vegetation.                                 | Numeric     | [@OurWorldinData2022]          |
+|                    |                                                   |                                                                                                                                                                                                                                                                                          |             |                                |
+|                    |                                                   | -   Entity, Code, Year, Annual CO2 Emission                                                                                                                                                                                                                                              |             |                                |
++--------------------+---------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
+| Control variable   | Region & Income                                   | -   Include each country's regions (either South Asia, Europe & Central Asia, Middle East & North Africa, East Asia & Pacific, Sub-Saharan Africa, Latin America & Caribbean, or North America)                                                                                          | Categorical | [@TheWorldBank2022]            |
+|                    |                                                   |                                                                                                                                                                                                                                                                                          |             |                                |
+|                    |                                                   | -   Include the income level of each country (either Low income, Lower-middle income, Upper-middle income, or High income)                                                                                                                                                               |             |                                |
++--------------------+---------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+--------------------------------+
+
+## Base Data
+
+These country-level datasets have a common country/entity and code variable. Due to the variety in some country's names, it is unsuitable to use "Country" as our primary key. Hence we will be using **"Code"** as our **primary key**, due to the consistent 3 letter country code.
+
+## Initial Overview
+
+To assess the impact of environmental and air pollution factors on the death rate of chronic respiratory diseases (CRD), we selected four key independent variables: **Forest area, fine particulate matter (PM2.5) concentrations, adult smoking prevalence, and carbon dioxide emissions**. Outdoor and indoor pollution are common risk factors for CRD, according to the World Health Organization @worldhealthorganization . **Particulate matter (PM)**, arising from industrial emissions, waste combustion, and transportation, is one contributor to outdoor pollution [@xu-qinjiang2016]. Whereas, **smoking** is a significant factor in indoor pollution [@xu-qinjiang2016]. Additionally, living near **forests** has been linked to asthma-related allergic symptoms [@giuliasquillacioti2017]. The burning of fossil fuels, producing compounds like **CO2**, can exacerbate lung inflammation and affect COPD patients' lung function [@xu-qinjiang2016]. These datasets, along with the CRD death rate, were sourced from the World Bank and Our World in Data, albeit in an unstructured form. Using the `glimpse()` function, we observed that each dataset includes country, code, year, and variable values.
+
+```{r}
+#Dependent - CRD Death rate
+respiratory <- read.csv("D:\\SEM 2 2023\\ETW3483 (Mon)\\DaphneyLoka_32685327_IA4\\data\\respiratory-disease-death-rate.csv")
+glimpse(respiratory)
+```
+
+```{r}
+#Independent 1 - Forest area
+forest <- read_xlsx("D:\\SEM 2 2023\\ETW3483 (Mon)\\DaphneyLoka_32685327_IA4\\data\\Forest Area (2015-2019).xlsx")
+glimpse(forest)
+```
+
+```{r}
+#Independent 2 - Concentrations of Fine Particulate Matter
+PM <- read_xlsx("D:\\SEM 2 2023\\ETW3483 (Mon)\\DaphneyLoka_32685327_IA4\\data\\Concentrations of fine particulate matter.xlsx")
+glimpse(PM)
+```
+
+```{r}
+#Independent 3 - share of adults smoking
+smoking <- read.csv("D:\\SEM 2 2023\\ETW3483 (Mon)\\DaphneyLoka_32685327_IA4\\data\\share-of-adults-who-smoke.csv")
+glimpse(smoking)
+```
+
+```{r}
+#Independent 4 - CO2 emission
+CO2 <- read.csv("D:\\SEM 2 2023\\ETW3483 (Mon)\\DaphneyLoka_32685327_IA4\\data\\annual-co2-emissions-per-country.csv")
+glimpse(CO2)
+```
+
+```{r}
+#Control variable - Income and Region
+income <- read_xlsx("D:\\SEM 2 2023\\ETW3483 (Mon)\\DaphneyLoka_32685327_IA4\\data\\Region & Income level.xlsx")
+glimpse(income)
+```
+
+# **Data Wrangling**
+
+## Tidy data
+
+In our case, all our variables are currently distributed across separate datasets. Before joining them into a single dataset we will tidy them by removing unnecessary columns and standardising the table structure, as outlined below, as our raw datasets lack uniformity which presents challenges. This is to facilitate the subsequent transformation process. Hence, our initial step involves tidying by CRD death and PM datasets exhibit a distinct structure featuring a 'Year' column instead of 2015 to 2019 columns, hence we apply `filter` to retain the desired years and employ `pivot` function . The forest dataset contains two redundant columns ('Series name' and 'Series code') that have been removed. Additionally, the 2015 to 2019 columns were initially identified as character data and were converted to a numeric format. Furthermore, four missing values were detected, which are removed as they correlate to unrecorded in the World Bank dataset.
+
++---------+--------+--------+--------+--------+--------+--------+
+| Country | Code   | 2015   | 2016   | 2017   | 2018   | 2019   |
++=========+========+========+========+========+========+========+
+| ...     | ...    | ...    | ...    | ...    | ...    | ...    |
++---------+--------+--------+--------+--------+--------+--------+
+
+### Respiratory
+
+```{r}
+class(respiratory$Deaths...Chronic.respiratory.diseases...Sex..Both...Age..Age.standardized..Rate.)
+#numeric
+```
+
+```{r}
+class(respiratory$Year) #integer
+```
+
+```{r}
+#Filter forest data to only 2015 - 2019
+respiratory_tidy <- respiratory %>%
+  filter(Year %in% c(2015, 2016, 2017, 2018, 2019)) %>%
+  rename(CRD_death = "Deaths...Chronic.respiratory.diseases...Sex..Both...Age..Age.standardized..Rate.", Country = "Entity")
+
+#Pivot wider for structure standardisation
+respiratory_tidy <- respiratory_tidy %>%
+  pivot_wider(names_from = "Year", values_from = "CRD_death")
+
+class(respiratory_tidy$`2015`)
+#together with 2016,2017,2018,2019 all are already numeric
+```
+
+```{r}
+glimpse(respiratory_tidy)
+```
+
+### Forest
+
+```{r}
+class(forest$`2015 [YR2015]`) #character
+```
+
+```{r}
+forest_tidy <- forest %>%
+  select(-1, -2) %>%   #remove unnecessary columns
+  rename (
+    Country = "Country Name",
+    Code = "Country Code",
+    `2015` = "2015 [YR2015]",
+    `2016` = "2016 [YR2016]",
+    `2017` = "2017 [YR2017]",
+    `2018` = "2018 [YR2018]",
+    `2019` = "2019 [YR2019]") %>%
+  mutate(across(c(`2015`, `2016`, `2017`, `2018`, `2019`), as.numeric)) %>% #convert to numeric
+  mutate_if(is.numeric, round, 2)
+```
+
+```{r}
+library(hablar)
+
+forest_tidy %>% find_na() #four NAs
+```
+
+```{r}
+forest_tidy1 <- na.omit(forest_tidy) #remove NAs
+
+forest_tidy1 %>% find_na() #No more NAs
+```
+
+### Concentrations of Fine PM
+
+```{r}
+class(PM$FactValueNumeric) #numeric
+```
+
+Is already numeric so no change is needed
+
+```{r}
+PM_tidy <- PM %>%
+  select(7, 8, 10, 24) %>%
+  rename(Code = "SpatialDimValueCode", Country = "Location", PM_value = "FactValueNumeric", Year = "Period")
+
+PM_tidy <- PM_tidy %>%
+  pivot_wider(names_from = "Year", values_from = "PM_value")
+
+glimpse(PM_tidy)
+```
+
+### Smoking
+
+```{r}
+class(smoking$Prevalence.of.current.tobacco.use....of.adults.)
+```
+
+```{r}
+class(smoking$Year) #integer
+```
+
+```{r}
+#Filter forest data to only 2015 - 2019
+smoking_tidy <- smoking %>%
+  filter(Year %in% c(2015, 2018, 2019)) %>%
+  rename(tobacco_use = "Prevalence.of.current.tobacco.use....of.adults.", Country = "Entity")
+
+smoking_tidy <- smoking_tidy %>%
+  pivot_wider(names_from = "Year", values_from = "tobacco_use")
+
+class(smoking_tidy$`2015`)
+```
+
+```{r}
+glimpse(smoking_tidy)
+```
+
+### CO2
+
+```{r}
+class(CO2$Annual.CO..emissions)
+```
+
+```{r}
+class(CO2$Year)
+```
+
+```{r}
+#Filter forest data to only 2015 - 2019
+CO2_tidy <- CO2 %>%
+  filter(Year %in% c(2015, 2016, 2017, 2018, 2019)) %>%
+  rename(Country = "Entity")
+
+#Pivot wider for structure standardisation
+CO2_tidy <- CO2_tidy %>%
+  pivot_wider(names_from = "Year", values_from = "Annual.CO..emissions") %>%
+  filter(Code != "")
+
+class(CO2_tidy$`2015`)
+#together with 2016,2017,2018,2019 all are already numeric
+```
+
+```{r}
+glimpse(CO2_tidy)
+```
+
+### Income
+
+```{r}
+income <- income %>%
+  rename (Country = "Economy", income_group = `Income group`)
+```
+
+## Transform data
+
+After tidying we can proceed with calculating the average values of numerical variables over a five-year period, which is the scope of analysis. Subsequently, all the datasets are joined into a single dataset using the `left_join` function, with the **"Code"** in the 'PM' dataset as the **base data** due to its 195 observations, aligning with the total number of countries globally. After joining, four of our categorical variables are observed to be labelled as characters by R, which will be converted into factors to enhance usability. The `vis_miss` function contained in visdat package is employed, to identify the location of missing values within our dataset. There are two observations (COK, NIU) that do not contain Country Name, Region, Income, Smoke, and Forest datasets, hence are deemed to be removed. The majority of our missing values are concentrated within the Smoke datasets, while both Forest and CO2 datasets contain two NAs each.
+
+### Calculating Average of Five Years
+
+```{r}
+#Average of CRD death rate across five years
+respiratory_mean <- respiratory_tidy %>%
+  group_by(Country, Code) %>%
+  summarise(avg_crd_five = mean(`2015`, `2016`, `2017`, `2018`, `2019`)) %>%
+  ungroup() %>%
+  select(-1)
+
+glimpse(respiratory_mean)
+```
+
+```{r}
+forest_mean <- forest_tidy1 %>%
+  group_by(Country, Code) %>%
+  summarise(avg_forest_five = mean(`2015`, `2016`, `2017`, `2018`, `2019`)) %>%
+  ungroup() %>%
+  select(-1)
+
+glimpse(forest_mean)
+```
+
+```{r}
+PM_mean <- PM_tidy %>%
+  group_by(Country, Code) %>%
+  summarise(avg_PM_five = mean(`2015`, `2016`, `2017`, `2018`, `2019`)) %>%
+  ungroup() %>%
+  select(-1)
+
+glimpse(PM_mean)
+```
+
+```{r}
+smoking_mean <- smoking_tidy %>%
+  mutate_if(is.numeric, round, 2) %>%
+  group_by(Country, Code) %>%
+  summarise(avg_smoke_five = mean(`2015`, `2018`, `2019`)) %>%
+  ungroup() %>%
+  select(-1)
+
+glimpse(smoking_mean)
+```
+
+```{r}
+CO2_mean <- CO2_tidy %>%
+  group_by(Country, Code) %>%
+  summarise(avg_CO2_five = mean(`2015`, `2016`, `2017`, `2018`, `2019`)) %>%
+  ungroup() %>%
+  select(-1)
+
+glimpse(CO2_mean)
+```
+
+### Joining all datasets
+
+```{r}
+join1 <- left_join(PM_mean, respiratory_mean, by = "Code")
+
+join2 <- left_join(join1, forest_mean, by = "Code")
+
+join3 <- left_join(join2, smoking_mean, by = "Code")
+
+join4 <- left_join(join3, CO2_mean, by = "Code")
+  
+join5 <- left_join(join4, income, by = "Code")
+```
+
+#### Convert categorical variables as factor
+
+```{r}
+class(join5$Country) #character
+class(join5$Code) #character
+class(join5$Region) #character
+class(join5$income_group) #character
+```
+
+```{r}
+join5_factor <- join5 %>%
+  mutate(across(where(is.character), as.factor))
+
+glimpse(join5_factor)
+```
+
+#### Missing Values
+
+```{r}
+library(visdat)
+vis_miss(join5)
+```
+
+```{r}
+join5_no <- join5_factor[-c(40, 127),] #remove COK and NIU
+
+final <- join5_no %>% select(7,1,8,9,3,4,2,5,6) %>% #rearrange columns
+  mutate_if(is.numeric, round, 2)
+```
+
+# **Final Results Presentation**
+
+## Final Overview after Tidying and Transforming
+
+Provided below is an overview of our finalized datasets, comprising 193 distinct rows, each representing a country, and a total of nine columns. These columns are structured as follows: "Country", "Code", "Region", "Income group", "Average CRD death rate", "Average forest area", "Average concentrations of fine particulate matter (PM2.5)", "Average share of adults smoking", and "Average CO2 emissions". It's worth noting that for the subsequent sections of our analysis, the "Country" and "Code" columns will not be utilized. Instead, our analysis will pivot around the "Region", simplifying the interpretation of our independent variables and the control variable ('income level'). Notably, while the data remained free of missing values after the tidying process, the joining procedure has introduced missing values, stemming from the absence of records for certain countries of some datasets. These missing values will be addressed through median imputation in Section 4.3.1 [Blueprint 1 (Log(CO2))] and Section 4.3.2 [Blueprint 2 (Log (CRD & CO2))].
+
+```{r}
+glimpse(final)
+```
+
+## Summary Statistics - Descriptive statistics
+
+```{r}
+library(gtsummary)
+```
+
+```{r}
+#Numerical variables by Region
+final %>% 
+  tbl_summary(include = c(avg_crd_five, avg_PM_five, avg_forest_five, avg_smoke_five, avg_CO2_five),
+              by = Region,
+              missing = "no",
+              type = all_continuous() ~ "continuous2",
+    statistic = list(all_continuous() ~ c(
+      "{median} ({p25}, {p75})",
+      "{mean}"), all_categorical() ~ "{n} ({p}%)")) %>%
+  add_overall() %>%
+  bold_labels()
+```
+
+```{r}
+hist(final$avg_CO2_five, main = "Distribution for CO2 Emission")
+```
+
+```{r}
+#SEPARATE INCOME ONLY BY REGION
+final %>%
+  tbl_summary(include = c(Region, income_group),
+              by = Region,
+              statistic = list(all_categorical() ~ "{n} ({p}%)")) %>%
+  add_overall() %>%
+  bold_labels()
+```
+
+## Predictive Modelling
+
+### Data Splitting
+
+```{r}
+#packages
+library(rsample)
+library(recipes)
+library(caret)
+```
+
+```{r}
+set.seed(123)
+split <- initial_split(final, strata = "avg_crd_five")
+final_train <- training(split)
+final_test <- testing(split)
+```
+
+```{r}
+#Plotting missing datas (NAs)
+vis_miss(final)
+```
+
+### Blueprint 1 (Log(CO2))
+
+```{r}
+final_recipe1 <- recipe(avg_crd_five ~ ., data = final_train) %>%
+  step_log(avg_CO2_five) %>%      #normalize with a log transformation
+  step_impute_median(avg_smoke_five, avg_CO2_five) %>%   #median imputation of NAs
+  step_dummy(Region, income_group)
+
+prepare1 <- prep(final_recipe1, training = final_train)
+
+baked_train1 <- bake(prepare1, new_data = final_train)
+baked_test1 <- bake(prepare1, new_data = final_test)
+```
+
+```{r}
+baked_train1
+```
+
+```{r}
+baked_test1
+```
+
+```{r}
+cor(baked_train1[c("avg_crd_five", "avg_forest_five", "avg_PM_five", "avg_smoke_five", "avg_CO2_five")])
+```
+
+#### **Multiple Linear Regression**
+
+#### [Model 1 (Only Air-pollution Variables)]{.underline}
+
+```{r}
+#Blueprint 1
+baked_train_subset1 <- baked_train1[, !colnames(baked_train1) %in% c("Country", "Code")]
+
+#Model 1
+lm1 <-lm(avg_crd_five ~ avg_forest_five + avg_PM_five + avg_smoke_five + avg_CO2_five, data = baked_train_subset1)
+summary(lm1)
+```
+
+```{r}
+#to analyse residuals to identify bias
+residuals1 <- resid(lm1)
+hist(residuals1)
+#A well-fitted model should have residuals that are normally distributed and centered around zero.
+
+#Not that well-fitted
+```
+
+#### [Model 2 (Air-pollution Variables + Control Variables (Region & Income))]{.underline}
+
+```{r}
+#Model 2
+lm2 <-lm(avg_crd_five ~., data = baked_train_subset1)
+summary(lm2)
+```
+
+```{r}
+#to analyse residuals to identify bias
+residuals2 <- resid(lm2)
+hist(residuals2)
+
+#A well-fitted model should have residuals that are normally distributed and centered around zero.
+
+#it is centered around zero but have outliers with large numbers
+```
+
+### Blueprint 2 (Log (CRD & CO2))
+
+```{r}
+#Distribution of CRD death rate train set using histrogram
+hist(final_train$avg_crd_five, main = "Distribution for CRD Death Rate")
+#Positively skewed
+```
+
+```{r}
+#log crd five
+final_recipe2 <- recipe(avg_crd_five ~ ., data = final_train) %>%
+  step_log(avg_crd_five, avg_CO2_five) %>%      #normalize with a log transformation
+  step_impute_median(avg_smoke_five, avg_CO2_five) %>%   #median imputation of NAs
+  step_dummy(Region, income_group)
+
+prepare2 <- prep(final_recipe2, training = final_train)
+
+baked_train2 <- bake(prepare2, new_data = final_train)
+baked_test2 <- bake(prepare2, new_data = final_test)
+```
+
+```{r}
+baked_train2
+```
+
+```{r}
+baked_test2
+```
+
+```{r}
+cor(baked_train2[c("avg_crd_five", "avg_forest_five", "avg_PM_five", "avg_smoke_five", "avg_CO2_five")])
+```
+
+#### [Model 3 (Only Air-pollution Variables)]{.underline}
+
+```{r}
+baked_train_subset2 <- baked_train2[, !colnames(baked_train2) %in% c("Country", "Code")]
+
+lm3 <-lm(avg_crd_five ~ avg_forest_five + avg_PM_five + avg_smoke_five + avg_CO2_five, data = baked_train_subset2)
+summary(lm3)
+```
+
+```{r}
+#to analyse residuals to identify bias
+residuals3 <- resid(lm3)
+hist(residuals3)
+#A well-fitted model should have residuals that are normally distributed and centered around zero.
+
+#Well-fitted
+```
+
+#### Model 4 ([Air-pollution Variables + Control Variables (Region & Income))]{.underline}
+
+```{r}
+lm4 <-lm(avg_crd_five ~., data = baked_train_subset2)
+summary(lm4)
+```
+
+```{r}
+#to analyse residuals to identify bias
+residuals4 <- resid(lm4)
+hist(residuals4)
+
+#A well-fitted model should have residuals that are normally distributed and centered around zero.
+
+#Well-fitted
+```
+
+### Regression Equation
+
+Model 1 $$
+\hat{Y} = 74.5369 + 0.3713 forest + 0.8957 PM2.5 + 1.0565 smoking - 5.3324 CO2
+$$
+
+Model 2 $$
+\hat{Y} = 91.7240 + 0.1412 forest + 0.2203 PM2.5 + 0.5623 smoking - 3.1489 CO2-42.2226 ECA -35.3379 LAC-32.4062 MENA - 11.9765 NA + 40.4167 SA - 34.1753SSA+ 27.1569 Low +14.8170 LoM +3.1111 UpM
+$$
+
+Model 3 $$
+\hat{Y} = 4.3826 + 0.0053 forest + 0.0175 PM2.5 + 0.0103 smoking - 0.0997 CO2
+$$
+
+Model 4$$ \hat{Y} = 4.1532+ 0.0008forest + 0.0041PM2.5 + 0.0067smoking - 0.0369CO2-0.8894ECA -0.7035LAC-0.6460MENA - 0.1548NA + 0.3677SA - 0.4668SSA + 0.5953 Low +0.4296 LoM +0.2092UpM $$
+
+### Combining Regression Output for 4 MLR models
+
+```{r}
+finaltb <- list(lm1, lm2, lm3, lm4)
+
+library(tibble) #specific the header columns
+
+rows <- tribble(~term, ~'Model 1', ~'Model 2', ~'Model 3', ~'Model 4',
+                '(East Asia & Pacific = 0)', '', '', '', '')
+                
+attr(rows, 'position') <- c(11)
+```
+
+```{r}
+library(modelsummary)
+library(huxtable)
+
+finaltb_lm <- modelsummary(finaltb,
+             output = "huxtable",
+             fmt = 4,
+             esimate = "{estimate}{stars}",
+             statistics = "std.error",
+             stars = TRUE,
+             gof_omit = 'AIC|BIC|RMSE|Log.Lik.|FE',
+             add_rows = rows,
+             coef_rename = c("(Intercept)" = "Constant",
+               "avg_forest_five" = "Forest area (% of land area)",
+                             "avg_PM_five" = "Concentration of fine particulate matter (PM2.5)",
+                             "avg_smoke_five" = "Share of adults smoking",
+                             "avg_CO2_five" = "CO2 emission",
+                             "Region_Europe...Central.Asia" = "Europe & Central Asia",
+                             "Region_Latin.America...Caribbean" = "Latin America & Caribbean",
+                             "Region_Middle.East...North.Africa" = "Middle East & North America",
+                             "Region_North.America" = "North America",
+                             "Region_South.Asia" = "South Asia",
+                             "Region_Sub.Saharan.Africa" = "Sub Saharan Africa",
+                             "income_group_Low.income" = "(High income = 0) Low income",
+                             "income_group_Lower.Middle.income" = "Lower-middle income",
+                             "income_group_Upper.Middle.income" = "Upper-middle income"))
+
+
+finaltb_lm
+```
+
+### Assessing model accuracy
+
+```{r}
+# Train model using 10-fold cross-validation
+set.seed(123)  # for reproducibility
+(cv_lm1 <- train(
+  form = avg_crd_five ~ avg_forest_five + avg_PM_five + avg_smoke_five + avg_CO2_five, 
+  data = baked_train_subset1, 
+  method = "lm",
+  trControl = trainControl(method = "cv", number = 10)
+))
+```
+
+```{r}
+# Train model using 10-fold cross-validation
+set.seed(123)  # for reproducibility
+(cv_lm2 <- train(
+  form = avg_crd_five ~ ., 
+  data = baked_train_subset1, 
+  method = "lm",
+  trControl = trainControl(method = "cv", number = 10)
+))
+```
+
+```{r}
+# Train model using 10-fold cross-validation
+set.seed(123)  # for reproducibility
+(cv_lm3 <- train(
+  form = avg_crd_five ~ avg_forest_five + avg_PM_five + avg_smoke_five + avg_CO2_five, 
+  data = baked_train_subset2, 
+  method = "lm",
+  trControl = trainControl(method = "cv", number = 10)
+))
+```
+
+```{r}
+# Train model using 10-fold cross-validation
+set.seed(123)  # for reproducibility
+(cv_lm4 <- train(
+  form = avg_crd_five ~ ., 
+  data = baked_train_subset2, 
+  method = "lm",
+  trControl = trainControl(method = "cv", number = 10)
+))
+```
+
+#### Comparing Performance Metrics (MAE, RMSE, and R-squared)
+
+```{r}
+summary(
+  resamples(
+    list(
+      model1_lm = cv_lm1,
+      model2_lm = cv_lm2,
+      model3_lm = cv_lm3,
+      model4_lm = cv_lm4
+))) 
+#MODEL 4 is the top choice out of 4 MLR
+```
+
+### Principal Component Regression (PCR)
+
+Using Model 4
+
+```{r}
+#Blueprint 1
+
+# perform 10-fold cross validation on a PCR model tuning the 
+# number of principal components to use as predictors from 1-20
+set.seed(123)
+cv_model_pcr <- train(
+  avg_crd_five ~ ., 
+  data = baked_train_subset2, 
+  method = "pcr",
+  trControl = trainControl(method = "cv", number = 10),
+  preProcess = c("zv", "center", "scale"),   # remove zero variance features and standardize them
+  tuneLength = 20
+  )
+
+# model with lowest RMSE
+cv_model_pcr$bestTune
+##    ncomp
+## 11    11
+
+# plot cross-validated RMSE
+ggplot(cv_model_pcr)
+```
+
+### Partial Least Squares (PLS)
+
+```{r}
+# Blueprint 2
+
+# perform 10-fold cross validation on a PCR model tuning the 
+# number of principal components to use as predictors from 1-20
+set.seed(123)
+cv_model_pls <- train(
+  avg_crd_five ~ ., 
+  data = baked_train_subset2, 
+  method = "pls",
+  trControl = trainControl(method = "cv", number = 10),
+  preProcess = c("zv", "center", "scale"),   # remove zero variance features and standardize them
+  tuneLength = 20
+  )
+
+# model with lowest RMSE
+cv_model_pls$bestTune
+##    ncomp
+## 7    7
+
+# plot cross-validated RMSE
+ggplot(cv_model_pls)
+```
+
+```{r}
+library(vip)
+
+vip(cv_model_pls, num_features = 13, method = "model")
+```
+
+```{r}
+```
+
+## Model Evaluation
+
+```{r}
+# Extract out of sample performance measures
+summary(
+  resamples(
+    list(
+      model4_lm = cv_lm4,
+      model_pcr = cv_model_pcr, 
+      model_pls = cv_model_pls
+)))
+```
+
+### Final Model Selection - Model 4
+
+$$ \hat{Y} = 4.1532+ 0.0008forest + 0.0041PM2.5 + 0.0067smoking - 0.0369CO2-0.8894ECA -0.7035LAC-0.6460MENA - 0.1548NA + 0.3677SA - 0.4668SSA + 0.5953 Low +0.4296 LoM +0.2092UpM $$
+
+```{r}
+finaltb1 <- list(lm4)
+rows1 <- tribble(~term, ~'Model 2',
+                '(East Asia & Pacific = 0)', '')
+                
+attr(rows1, 'position') <- c(11)
+```
+
+```{r}
+finaltb_lm4 <- modelsummary(finaltb1,
+             output = "huxtable",
+             fmt = 4,
+             esimate = "{estimate}{stars}",
+             statistics = "std.error",
+             stars = TRUE,
+             gof_omit = 'AIC|BIC|RMSE|Log.Lik.|FE',
+             add_rows = rows1,
+             coef_rename = c("(Intercept)" = "Constant",
+               "avg_forest_five" = "Forest area (% of land area)",
+                             "avg_PM_five" = "Concentration of fine particulate matter (PM2.5)",
+                             "avg_smoke_five" = "Share of adults smoking",
+                             "avg_CO2_five" = "CO2 emission",
+                             "Region_Europe...Central.Asia" = "Europe & Central Asia",
+                             "Region_Latin.America...Caribbean" = "Latin America & Caribbean",
+                             "Region_Middle.East...North.Africa" = "Middle East & North America",
+                             "Region_North.America" = "North America",
+                             "Region_South.Asia" = "South Asia",
+                             "Region_Sub.Saharan.Africa" = "Sub Saharan Africa",
+                             "income_group_Low.income" = "(High income = 0) Low income",
+                             "income_group_Lower.Middle.income" = "Lower-middle income",
+                             "income_group_Upper.Middle.income" = "Upper-middle income"))
+
+
+finaltb_lm4
+```
+
+# **Discussion and Conclusion**
+
+## Descriptive Results discussion
+
+### Air-pollution variables
+
+With only eight countries, **South Asia** stands out with the **highest** CRD death rate, averaging 109 per 100,000 people, surpassing the overall average of 44 per 100,000 people. Following closely, the East Asia and Pacific region exhibits the second-highest CRD incidence, with 79,000 cases on average, followed by Sub-Saharan Africa with 52,000 reported cases. Having only two countries, North America records 31,000 CRD cases, while the Middle East & North Africa, Latin America & Caribbean, and Europe & Central Asia report 30,000, 28,000, and 24,000 individuals affected by CRD, respectively.
+
+Examining mean and median values reveals that the **average forest area and PM2.5 concentrations** display very **slight positive skewness, approaching normal distribution.** Conversely, the **average share of adults** smoking displays a **minimal negative skewness**, with the mean (22) slightly lower than the median (23).
+
+Conversely, the distribution of **average CO2 emissions is highly positively skewed**, as indicated by a substantial difference between the mean (178,243,370) and the median (10,788,440). Consequently, addressing this skewness through log transformation is essential before proceeding with regression modelling.
+
+### Income level distribution
+
+Regarding income distribution, the majority of **European & Asia Pacific** countries primarily fall into high or upper-middle income categories, accounting for 61% and 27% of countries, respectively, making them the most economically prosperous. Similarly, **North America** is characterized as a high-income region, albeit consisting of only two nations.
+
+Within **Latin America & Caribbean**, a significant portion of countries falls into the upper-income category, with 61% and 24% being upper-middle income and high income. The income distribution in the **Middle East & North Africa** region is relatively diverse, with most countries positioned in the lower-middle income category or higher.
+
+The East Asia & Pacific region mainly comprises countries in the middle-income bracket, comprising 73% (43% lower-middle income and 30% upper-middle income). In contrast, **South Asia and Sub-Saharan Africa** predominantly consist of low and lower-middle income countries, with very few high-income nations, making them the least economic prosperity.
+
+## Predictive Results discussion
+
+We developed four multiple regression models to analyze CRD death rates, and Model 4, featuring log transformation for CRD and Smoking, has the lowest MAE (0.3464) and RMSE (0.4293) on average, suggesting high predictive accuracy and minimal errors. 
+
+Although Models 1 and 2 exhibit notably larger MAE and RMSE due to the absence of CRD normalization by log, Model 1 display the highest R-squared (0.6279). Nonetheless, Model 4 stands out due to its strong MAE and RMSE performance, a desirable combination of low variance and low bias [@asitdubey2020].
+
+To enhance Model 4, we explored PCR and PLS models. Model 4 excelled with the lowest MAE (0.3464), while the PLS model outperformed in RMSE (0.4287) and R-squared (0.5826). However, Model 4 is favored for its interpretability, a critical aspect in addressing our research problem.
+
+Among air-pollution-related variables, CO2 emerged as the sole significant predictor, showing a negative relationship with CRD deaths at a 1% significance level (p-value \< 0.01), implying that lower CO2 emissions are linked to higher CRD deaths.
+
+Examining Region, South Asia. solely stood out with a positive coefficient, indicating that there are approximately 36,773 **more** CRD cases than in the East Asia & Pacific region on average. Other regions, except North America, exhibit **lower** CRD rates than East Asia & Pacific, with Sub-Saharan\*\*(46,678), Middle East\*\*\*(64,597), Latin America\*\*\*(70,353), and Europe\*\*\*(88,942) following in decreasing order.
+
+Income level demonstrates a negative relationship with CRD death rates, with lower income countries having the most substantial impact. Low-income countries projected a higher CRD death rate by 0.42 per 100,000 (equivalent to 42,963.5 individuals), Low-income countries are estimated to have a higher CRD death rate by 0.42 per 100,000 (equivalent to 42,963.5 individuals), while upper-middle income countries exhibit an average of 0.209 (or 20,923 individuals) more CRD deaths compared to High income countries.
+
+## Conclusion
+
+In conclusion, Carbon dioxide emissions stemming from fossil fuel burning from industrial serve as the most significant factor contributing to CRD death rate. However, the negative relationship is not what is expected as logically the higher CO2 emissions should contribute to higher CRD death rate. Our results also show that South Asia has the highest CRD death rate compared to the rest of the world and is proven by a lot of studies. This can be explained by the fact that South Asia consists of low to lower-middle income countries meaning that health resources for CRD treatments are not as advanced as high income countries, considering that CRD is incurable. 
+
+To combat this, governments should consider delegating some funding to improve medical treatments, allowing citizens to get routine medical examinations to detect early symptoms. Additionally, since renewable projects are risky, government especially in lower income countries should also consider providing policy support (i.e implying green finance loan) to encourages private investment in the green energy industry to take on environmentally-positive initiatives [@ehsanrasoulinezhad2020].
+
+Due to the lack of resources and time, our variables are not 100% representative of air pollution. Other considerations like CO, NO, and NO2, may be included. Moreover, one limitation of our analysis is that we only consider the environmental factors that are related to air pollution. Biological and physiological factors such as age, gender, BMI, blood pressure, may be taken into account in future studies.
+
+# References
